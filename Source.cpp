@@ -58,6 +58,15 @@ bool foodMatrix[21][21] = {
 //Inital pacman position
 int px = 20;
 int py = 20;
+
+// Inital ghost one position
+int g1x = 20;
+int g1y = 220;
+
+// Initial ghost two position
+int g2x = 320;
+int g2y = 300;
+
 int counter = 0;
 cv::Mat food = cv::imread("C:/Users/Pera/Desktop/Project1/images/food.png");
 
@@ -75,51 +84,179 @@ void movement(int key,cv::Mat& map)
 {
 	switch (key)
 	{
-		case 'w': 
+	case 'w':
+	case 'W':
 				if (py <= 0)
 					py = 400;
 				else if(mazeMatrix[(py - 20) / 20][px / 20] == 1)
 					py = py - 20;
 			eat(map, px, py);
-			cout << "U pressed w and new location is : " << px/20 << "," << py/20 << endl;
 			break;
 
-		case 's':
+	case 's': 
+	case 'S':
 			if (py == 400)
 				py = 0;
 			else if (mazeMatrix[(py + 20) / 20][px / 20] == 1)
 				py = py + 20;
 
 			eat(map, px, py);
-			cout << "U pressed s and new location is : " << px/20 << "," << py/20 << endl;
 			break;
 
-		case 'a':
+	case 'a':
+	case 'A':
 			if (px == 0)
 				px = 400;
 			else if (mazeMatrix[py / 20][(px - 20) / 20] == 1)
 				px = px - 20;
 
 			eat(map, px, py);
-			cout << "U pressed a and new location is : " << px/20 << "," << py/20 << endl;
 			break;
 
-		case 'd':
+	case 'd':
+	case 'D':
 			if (px == 400)
 				px = 0;
 			else if (mazeMatrix[py/20][(px + 20) / 20] == 1)
 				px = px + 20;
 			
 			eat(map, px, py);
-			cout << "U pressed d and new location is : " << px/20 << "," << py/20 << endl;
 			break;
 	}
+}
 
+void ghostMovement1()
+{
+	int direction = rand() % 4;
+	switch (direction)
+	{
+		// Up 
+		case 0 : 
+			if (g1y <= 0)
+				g1y = 400;
+			else if (mazeMatrix[(g1y - 20) / 20][g1x / 20] == 1)
+				g1y = g1y - 20;
+			break;
+	
+		// Down 
+		case 1 : 
+			if (g1y == 400)
+				g1y = 0;
+			else if (mazeMatrix[(g1y + 20) / 20][g1x / 20] == 1)
+				g1y = g1y + 20;
+			break;
+
+		// Left
+		case 2 : 
+			if (g1x == 0)
+				g1x = 400;
+			else if (mazeMatrix[g1y / 20][(g1x- 20) / 20] == 1)
+				g1x = g1x - 20;
+			break;
+
+		// Right
+		case 3: 
+			if (g1x == 400)
+				g1x = 0;
+			else if (mazeMatrix[g1y/20][(g1x + 20) / 20] == 1)
+				g1x = g1x + 20;
+			break;
+	}
+}
+
+void drawGhost1(cv::Mat& image)
+{
+
+	cv::Mat ghost1 = cv::imread("C:/Users/Pera/Desktop/Project1/images/red_ghost.png");
+	if (ghost1.empty()) {
+		cout << "Error in loading images." << endl;
+		return;
+	}
+
+	cv::Size newSize(20, 20);
+	cv::Mat ghost1_20;
+	cv::resize(ghost1, ghost1_20, newSize);
+
+	cv::Rect roi(cv::Point(g1x, g1y), ghost1_20.size());
+	cv::Mat desinationROI2 = image(roi);
+	cv::Mat ghost1_20_Mask = ghost1_20(cv::Rect(0, 0, ghost1_20.cols, ghost1_20.rows));
+	ghost1_20.copyTo(desinationROI2, ghost1_20_Mask);
+
+	/*
+	cv::Scalar color(0, 0, 255);
+	cv::Point center(g1x + 10, g1y + 10);
+	int radius = 10;
+	cv::circle(image, center, radius, color, -1);
+	*/
+}
+
+void ghostMovement2()
+{
+	int direction = rand() % 4;
+	switch (direction)
+	{
+		// Up 
+		case 0:
+			if (g2y <= 0)
+				g2y = 400;
+			else if (mazeMatrix[(g2y - 20) / 20][g2x / 20] == 1)
+				g2y = g2y - 20;
+			break;
+
+		// Down 
+		case 1:
+			if (g2y == 400)
+				g2y = 0;
+			else if (mazeMatrix[(g2y + 20) / 20][g2x / 20] == 1)
+				g2y = g2y + 20;
+			break;
+
+		// Left
+		case 2:
+			if (g2x == 0)
+				g2x = 400;
+			else if (mazeMatrix[g2y / 20][(g2x - 20) / 20] == 1)
+				g2x = g2x - 20;
+			break;
+
+		// Right
+		case 3:
+			if (g2x == 400)
+				g2x = 0;
+			else if (mazeMatrix[g2y / 20][(g2x + 20) / 20] == 1)
+				g2x = g2x + 20;
+			break;
+	}
+}
+
+void drawGhost2(cv::Mat& image)
+{
+	cv::Mat ghost2 = cv::imread("C:/Users/Pera/Desktop/Project1/images/blue_ghost.png");
+	if (ghost2.empty()) {
+		cout << "Error in loading images." << endl;
+		return;
+	}
+
+	cv::Size newSize(20, 20);
+	cv::Mat ghost2_20;
+	cv::resize(ghost2, ghost2_20, newSize);
+
+	cv::Rect roi(cv::Point(g2x, g2y), ghost2_20.size());
+	cv::Mat desinationROI3 = image(roi);
+	cv::Mat ghost2_20_Mask = ghost2_20(cv::Rect(0, 0, ghost2_20.cols, ghost2_20.rows));
+	ghost2_20.copyTo(desinationROI3, ghost2_20_Mask);
+
+	/*
+	cv::Scalar color(0, 0, 255);
+	cv::Point center(g2x + 10, g2y + 10);
+	int radius = 10;
+	cv::circle(image, center, radius, color, -1);
+	*/
 }
 
 void drawPacman(cv::Mat& image) 
 {
-	/*
+	// If for some reason this gives opencv roi errors, use the code below (Yellow circle instead of actual image.)
 	cv::Mat pacman = cv::imread("C:/Users/Pera/Desktop/Project1/images/pacman.png");
 	if (pacman.empty()) {
 		cout << "Error in loading images." << endl;
@@ -134,41 +271,35 @@ void drawPacman(cv::Mat& image)
 	cv::Mat desinationROI = image(roi);
 	cv::Mat pacmanMask = Pac20(cv::Rect(0, 0, Pac20.cols, Pac20.rows));
 	Pac20.copyTo(desinationROI, pacmanMask);
-	*/
 	
-
-	cv::Scalar color(255, 255, 0); // Yellow
-
-	// Pacman center coordinates
-	cv::Point center(px + 10, py + 10); // Adjusted to center Pacman in the grid cell
-
-	// Pacman radius
-	int radius = 10; // Adjusted to fit Pacman within the grid cell
-
-	// Draw Pacman
+	/*
+	cv::Scalar color(0, 255, 255); // Yellow
+	cv::Point center(px + 10, py + 10); 
+	int radius = 10; 
 	cv::circle(image, center, radius, color, -1);
+	*/
 }
 
-void viewPoints(cv::Mat& image)
+void victory(cv::Mat& image)
 {
-	string points = "Points collected : " + to_string(counter);
-	putText(image, points, Point(20, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
-	imshow("Points", image);
-
-	if(counter == 210)
-	{
-		string win = "You collected all points !";
+		string win = "Victory!";
 		putText(image, win, Point(20, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
 		imshow("Points", image);
-	}
+}
+
+void defeat(cv::Mat& image)
+{
+	string defeat = "Defeat!";
+	putText(image, defeat, Point(20, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
+	imshow("Points", image);
 }
 
 int main()
 {
-	//cv::Mat map = cv::imread("C:/Users/Pera/Desktop/Project1/images/map.png");
-	
+	// Randomization for ghosts
+	srand(time(NULL));
 
-	if (/*map.empty()||*/ food.empty()) {
+	if (food.empty()) {
 		cout << "Error in loading images." << endl;
 		return -1;
 	}
@@ -199,38 +330,40 @@ int main()
 		}
 	}
 
-	int zeroind = 0;
-	for (int i = 0; i < 21; i++) {
-		for (int j = 0; j < 21; j++) {
-			if (mazeMatrix[i][j] == 0)
-				zeroind++;
-		}
-	}
-	cout << "NUmer of zeros is : " << zeroind << endl;
 	
 	while (true)
 	{
 		cv::Mat display = map.clone();
-		cv::Mat pointsCounter = Mat::zeros(100, 400, CV_8UC3);
+		cv::Mat finalWindow = Mat::zeros(100, 400, CV_8UC3);
 		drawPacman(display);
-		viewPoints(pointsCounter);
+		drawGhost1(display);
+		drawGhost2(display);
 		cv::imshow("Pacman Game", display);
 		char key = cv::waitKey(100);
 		if (key == 27)
 			break;
 		else
-			movement(key,map);
+		{
+			movement(key, map);
+			ghostMovement1();
+			ghostMovement2();
+
+			if (counter == 210)
+			{
+				victory(finalWindow);
+				break;
+			}
+
+			if ((px == g1x && py == g1y) || (px == g2x && py == g2y))
+			{
+				defeat(finalWindow);
+				break;
+			}
+
+		}
 	}
 
-	// Testing pacman positioning
-	/*
-	cv::Rect roi(cv::Point(px,py),pacman.size());
-	cv::Mat desinationROI = map(roi);
-	cv::Mat pacmanMask = pacman(cv::Rect(0, 0, pacman.cols, pacman.rows));
-	pacman.copyTo(desinationROI, pacmanMask);
-	*/
-	//cv::imshow("Map with food and pacman", map);
-	//cv::waitKey(0);
+	cv::waitKey(0);
 	cv::destroyAllWindows();
 	return 0;
 }
