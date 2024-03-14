@@ -71,6 +71,7 @@ int g2y = 300;
 // Collected food counter
 int counter = 0;
 
+// Change to your path directory
 cv::Mat food = cv::imread("C:/Users/Pera/Desktop/Project1/images/food.png");
 
 void eat(cv::Mat& map, int px, int py)
@@ -169,7 +170,7 @@ void ghostMovement1()
 
 void drawGhost1(cv::Mat& image)
 {
-
+	// Change to your path directory
 	cv::Mat ghost1 = cv::imread("C:/Users/Pera/Desktop/Project1/images/red_ghost.png");
 	if (ghost1.empty()) {
 		cout << "Error in loading images." << endl;
@@ -234,6 +235,7 @@ void ghostMovement2()
 
 void drawGhost2(cv::Mat& image)
 {
+	// Change to your path directory
 	cv::Mat ghost2 = cv::imread("C:/Users/Pera/Desktop/Project1/images/blue_ghost.png");
 	if (ghost2.empty()) {
 		cout << "Error in loading images." << endl;
@@ -260,6 +262,7 @@ void drawGhost2(cv::Mat& image)
 void drawPacman(cv::Mat& image)
 {
 	// If for some reason this gives opencv roi errors, use the code below (Yellow circle instead of actual image.)
+	// Change to your path directory
 	cv::Mat pacman = cv::imread("C:/Users/Pera/Desktop/Project1/images/pacman.png");
 	if (pacman.empty()) {
 		cout << "Error in loading images." << endl;
@@ -390,6 +393,9 @@ int main(int argc, char* argv[])
 		}
 
 	}
+	
+	// After exiting the main while loop (endgame), wait for any key press 
+	// so the game does not immidiatelly close
 	cv::waitKey(0);
 	cv::destroyAllWindows();
 	return 0;
