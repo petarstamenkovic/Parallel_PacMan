@@ -74,9 +74,11 @@ int counter = 0;
 // Change to your path directory
 cv::Mat food = cv::imread("C:/Users/Pera/Desktop/Project1/images/food.png");
 
+// Function that handles food removal from the food map
 void eat(cv::Mat& map, int px, int py)
 {
-	if (foodMatrix[py / 20][px / 20]) {
+	if (foodMatrix[py / 20][px / 20]) 
+	{
 		counter++;
 		foodMatrix[py / 20][px / 20] = 0;
 		cv::Rect roi(cv::Point(px, py), food.size());
@@ -84,6 +86,8 @@ void eat(cv::Mat& map, int px, int py)
 	}
 
 }
+
+// Function that moves the pacman depending on a key (for some reason arrows dont seem to work)
 void movement(int key, cv::Mat& map)
 {
 	switch (key)
@@ -129,6 +133,7 @@ void movement(int key, cv::Mat& map)
 	}
 }
 
+// Function that controls the movement of the first ghost
 void ghostMovement1()
 {
 	int direction = rand() % 4;
@@ -168,6 +173,7 @@ void ghostMovement1()
 	}
 }
 
+// Function that draws the first ghost
 void drawGhost1(cv::Mat& image)
 {
 	// Change to your path directory
@@ -186,6 +192,7 @@ void drawGhost1(cv::Mat& image)
 	cv::Mat ghost1_20_Mask = ghost1_20(cv::Rect(0, 0, ghost1_20.cols, ghost1_20.rows));
 	ghost1_20.copyTo(desinationROI2, ghost1_20_Mask);
 
+	// If picture loading does not work for some reason uncomment this and comment upper code
 	/*
 	cv::Scalar color(0, 0, 255);
 	cv::Point center(g1x + 10, g1y + 10);
@@ -194,6 +201,7 @@ void drawGhost1(cv::Mat& image)
 	*/
 }
 
+// Function that controls the movement of ghost 2
 void ghostMovement2()
 {
 	int direction = rand() % 4;
@@ -233,6 +241,7 @@ void ghostMovement2()
 	}
 }
 
+// Function that draws the second ghost
 void drawGhost2(cv::Mat& image)
 {
 	// Change to your path directory
@@ -251,6 +260,7 @@ void drawGhost2(cv::Mat& image)
 	cv::Mat ghost2_20_Mask = ghost2_20(cv::Rect(0, 0, ghost2_20.cols, ghost2_20.rows));
 	ghost2_20.copyTo(desinationROI3, ghost2_20_Mask);
 
+	// If picture loading does not work for some reason uncomment this and comment the upper code
 	/*
 	cv::Scalar color(0, 0, 255);
 	cv::Point center(g2x + 10, g2y + 10);
@@ -259,6 +269,7 @@ void drawGhost2(cv::Mat& image)
 	*/
 }
 
+// Function that draws the pacman
 void drawPacman(cv::Mat& image)
 {
 	// If for some reason this gives opencv roi errors, use the code below (Yellow circle instead of actual image.)
@@ -286,6 +297,7 @@ void drawPacman(cv::Mat& image)
 	*/
 }
 
+// Function that draws the winning window
 void victory(cv::Mat& image)
 {
 	string win = "Victory!";
@@ -293,6 +305,7 @@ void victory(cv::Mat& image)
 	imshow("PacMan Game", image);
 }
 
+// Function that draws the losing window
 void defeat(cv::Mat& image)
 {
 	string defeat = "Defeat!";
@@ -301,12 +314,16 @@ void defeat(cv::Mat& image)
 	putText(image, points_won, Point(20, 60), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
 	imshow("PacMan game", image);
 }
+
+// MAIN CODE
 int main(int argc, char* argv[])
 {
     // Number of threads
 	int tc = strtol(argv[1], NULL, 10);
 
+	// Set a random seed for a randomised ghost movement
 	srand(time(NULL));
+	
 	if (food.empty()) {
 		cout << "Error in loading images." << endl;
 		return -1;
@@ -322,6 +339,7 @@ int main(int argc, char* argv[])
 			cv::rectangle(map, cv::Point(j * scale, i * scale), cv::Point((j + 1) * scale, (i + 1) * scale), color, -1);
 		}
 	}
+
 	// Fill the map with food
 	for (int i = 0; i < 21; i++) {
 		for (int j = 0; j < 21; j++) {
@@ -336,7 +354,10 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+
 	//////////////// parallel code /////////////////
+
+	// True - Never exist the loop unless winning mechanism is achieved or esc key is pressed
 	while (true)
 	{
 		char key = cv::waitKey(100);
@@ -345,11 +366,12 @@ int main(int argc, char* argv[])
 			break;
 		else
 		{
-			cv::Mat display = map.clone();
+			cv::Mat display = map.clone();		// Clone the map and do changes on that one
 			cv::Mat finalWindow = Mat::zeros(100, 400, CV_8UC3);
 			#pragma omp parallel num_threads(tc)
 			{
 				int trank = omp_get_thread_num();
+				// Depends on a thread rank do a specific block of code -- Cout statements are for debugging purposes
 				switch (trank)
 				{
 				case 0: // Thread 0 controls the changes in the map and drawing out charachers
@@ -378,13 +400,14 @@ int main(int argc, char* argv[])
 				}
 			}
 
-			// This is not parallel becaues its the endgame mechanism
+			// This is not parallel becaues it's the endgame mechanism
 			if (counter == 210)
 			{
 				victory(finalWindow);
 				break;
 			}
-			// Check if pacman and ghost collided
+
+			// Check if pacman and ghost collided - This means you lost
 			if ((px == g1x && py == g1y) || (px == g2x && py == g2y))
 			{
 				defeat(finalWindow);
