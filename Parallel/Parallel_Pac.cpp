@@ -1,4 +1,5 @@
 #include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 #include <stdio.h>
 #include <omp.h>
 #include <iostream>
@@ -87,13 +88,14 @@ void eat(cv::Mat& map, int px, int py)
 
 }
 
-// Function that moves the pacman depending on a key (for some reason arrows dont seem to work)
+// Function that moves the pacman depending on a key (for some reason arrows dont seem to work for my machine)
 void movement(int key, cv::Mat& map)
 {
-	switch (key)
+	switch (key)		// Arrow keys on my keyboard dont give any feedback for cv::waitKey(100) so I use only w a s d
+						// If you want you can add arrow keys on your machine - its usually something around 70-80
 	{
 	case 'w':
-	case 'W':  
+	case 'W':
 		if (py <= 0)
 			py = 400;
 		else if (mazeMatrix[(py - 20) / 20][px / 20] == 1)
@@ -107,7 +109,6 @@ void movement(int key, cv::Mat& map)
 			py = 0;
 		else if (mazeMatrix[(py + 20) / 20][px / 20] == 1)
 			py = py + 20;
-
 		eat(map, px, py);
 		break;
 
@@ -117,7 +118,6 @@ void movement(int key, cv::Mat& map)
 			px = 400;
 		else if (mazeMatrix[py / 20][(px - 20) / 20] == 1)
 			px = px - 20;
-
 		eat(map, px, py);
 		break;
 
@@ -127,7 +127,6 @@ void movement(int key, cv::Mat& map)
 			px = 0;
 		else if (mazeMatrix[py / 20][(px + 20) / 20] == 1)
 			px = px + 20;
-
 		eat(map, px, py);
 		break;
 	}
@@ -183,6 +182,7 @@ void drawGhost1(cv::Mat& image)
 		return;
 	}
 
+	// Resize to fit the map image
 	cv::Size newSize(20, 20);
 	cv::Mat ghost1_20;
 	cv::resize(ghost1, ghost1_20, newSize);
@@ -251,6 +251,7 @@ void drawGhost2(cv::Mat& image)
 		return;
 	}
 
+	// Resize to fit the map image
 	cv::Size newSize(20, 20);
 	cv::Mat ghost2_20;
 	cv::resize(ghost2, ghost2_20, newSize);
@@ -280,6 +281,7 @@ void drawPacman(cv::Mat& image)
 		return;
 	}
 
+	// Resize to fit the map image
 	cv::Size newSize(20, 20);
 	cv::Mat Pac20;
 	cv::resize(pacman, Pac20, newSize);
@@ -302,7 +304,7 @@ void victory(cv::Mat& image)
 {
 	string win = "Victory!";
 	putText(image, win, Point(20, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
-	imshow("PacMan Game", image);
+	imshow("Pacman", image);
 }
 
 // Function that draws the losing window
@@ -312,16 +314,26 @@ void defeat(cv::Mat& image)
 	string points_won = "Points collected : " + to_string(counter);
 	putText(image, defeat, Point(20, 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
 	putText(image, points_won, Point(20, 60), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
-	imshow("PacMan game", image);
+	imshow("Pacman", image);
 }
 
 // MAIN CODE
 int main(int argc, char* argv[])
 {
+	// Here check the ASCI values for arrows if u want, breakpoint it at 331
+	/*char key_press;
+	while (true)
+	{
+		char key = cv::waitKey(100);
+		//if(key_press != -1)
+			cout << "You pressed the key with code : " << key << endl;
+	}*/
+	
+
     // Number of threads
 	int tc = strtol(argv[1], NULL, 10);
 
-	// Set a random seed for a randomised ghost movement
+	// Random seed for ghost movement
 	srand(time(NULL));
 	
 	if (food.empty()) {
@@ -361,13 +373,15 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		char key = cv::waitKey(100);
+		//cout << "You pressed the key with code : " << (int)key << endl;
 		// Key 27 is an escape key
 		if (key == 27)
 			break;
 		else
 		{
-			cv::Mat display = map.clone();		// Clone the map and do changes on that one
+			cv::Mat display = map.clone();		// Clone the map and do changes on that one so that icons dont stack up
 			cv::Mat finalWindow = Mat::zeros(100, 400, CV_8UC3);
+			
 			#pragma omp parallel num_threads(tc)
 			{
 				int trank = omp_get_thread_num();
@@ -378,7 +392,7 @@ int main(int argc, char* argv[])
 					drawPacman(display);
 					drawGhost1(display);
 					drawGhost2(display);
-					cv::imshow("Pacman Game", display);
+					cv::imshow("Pacman", display);
 					//cout << "Hi im thread 0! " << endl;
 					break;
 
@@ -419,7 +433,7 @@ int main(int argc, char* argv[])
 	
 	// After exiting the main while loop (endgame), wait for any key press 
 	// so the game does not immidiatelly close
-	cv::waitKey(0);
+	//cv::waitKey(0);
 	cv::destroyAllWindows();
 	return 0;
 }
